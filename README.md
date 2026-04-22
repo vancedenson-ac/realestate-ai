@@ -1,6 +1,6 @@
-Mock Demo: https://realtrust-mock-v2.vercel.app/
-
 # RealTrust AI — Technical Overview
+
+DEMO SITE: https://realtrust-mock-v2.vercel.app/listings
 
 *This document summarizes the security-first, specification-driven architecture of RealTrust AI. All normative requirements are traceable to the canonical spec set in `.cursor/skills/realtrust-backend/references/` and `.cursor/skills/realtrust-frontend/references/`.*
 
@@ -159,4 +159,4 @@ Backend: `02-regulatory-and-compliance-spec`, `03-architecture-backend`, `05-tra
 Frontend: `19-architecture-frontend`, `20-api-contract-frontend`, `21-ui-journey-and-pages`.  
 Cross-cutting: `15-llm-rules-and-system-contract`, `13-glossary-and-normative-language`.
 
-All of the above are in `.cursor/skills/realtrust-backend/references/` and `.cursor/skills/realtrust-frontend/references/`. The implementation in `backend/` and `frontend/` is aligned with these specifications to deliver a **security-first, audit-ready, regulator-friendly** real estate transaction platform.
+All of the above are in `.cursor/skills/realtrust-backend/references/` and `.cursor/skills/realtrust-frontend/references/`. The implementation in `backend/realtrust-ai/` and `frontend_v2/` is aligned with these specifications to deliver a **security-first, audit-ready, regulator-friendly** real estate transaction platform.
