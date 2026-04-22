@@ -1,0 +1,115 @@
+# realtrust — Full stack from repo root (db, api, minio, frontend).
+#
+# Start:    docker compose up -d
+# Init DB:  docker compose exec db psql -U realtrust -d realtrust -f /scripts/02-schema.sql
+# Seed:     docker compose exec db psql -U realtrust -d realtrust -f /scripts/03-seed.sql
+# Or use:   ./scripts/init-db.bat (Windows) or ./scripts/init-db.sh (Unix)
+#
+# API:      http://localhost:8000/realtrust-ai/v1  (docs: http://localhost:8000/docs)
+# Frontend: http://localhost:3000
+# MinIO:    http://localhost:9000 (API)  Console: http://localhost:9001
+#           Property image and document uploads use bucket "realtrust" (key prefixes properties/, documents/).
+#           If browser uploads fail with CORS, set CORS on bucket "realtrust" in MinIO Console (Access → CORS).
+
+services:
+  db:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.db
+    image: realtrust-db:local
+    environment:
+      POSTGRES_USER: realtrust
+      POSTGRES_PASSWORD: realtrust
+      POSTGRES_DB: realtrust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/scripts/init-extensions.sql:/docker-entrypoint-initdb.d/01-extensions.sql
+      - ./backend/scripts:/scripts:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U realtrust -d realtrust"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.api
+    image: realtrust-api:local
+    environment:
+      DATABASE_URL: postgresql+asyncpg://app_user:realtrust@db:5432/realtrust
+      API_V1_PREFIX: /realtrust-ai/v1
+      DEBUG: "false"
+      # CORS: allow frontend origin (browser uses host URLs when both run in Docker)
+      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+      # MinIO (S3-compatible): API connects to minio:9000; presigned URLs use localhost so browser can upload
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_PUBLIC_ENDPOINT_URL: http://localhost:9000
+      S3_BUCKET: realtrust
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      S3_USE_SSL: "false"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      minio-cors:
+        condition: service_completed_successfully
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      # Set MINIO_ROOT_USER and MINIO_ROOT_PASSWORD in .env to avoid default-credentials warning.
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+
+  # One-off: set CORS on bucket "realtrust" so browser (localhost:3000) can PUT presigned uploads.
+  minio-cors:
+    image: minio/mc:latest
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sleep 5
+        mc alias set myminio http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}"
+        mc mb myminio/realtrust --ignore-existing
+        mc cors set myminio/realtrust /cors.xml
+        echo "CORS applied to bucket realtrust"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - ./scripts/minio-cors.xml:/cors.xml:ro
+    depends_on:
+      minio:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE: http://localhost:8000
+        NEXT_PUBLIC_MAPBOX_TOKEN: ENTER_YOUR_KEY
+    image: realtrust-frontend:local
+    environment:
+      NEXT_PUBLIC_API_BASE: http://localhost:8000
+      NEXT_PUBLIC_MAPBOX_TOKEN: ENTER_YOUR_KEY
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  minio_data:

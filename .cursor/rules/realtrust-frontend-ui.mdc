@@ -1,0 +1,19 @@
+---
+description: realtrust frontend — pages, layout, nav, role-based UX, journey alignment
+globs: "frontend/src/app/**/*,frontend/src/components/**/*"
+alwaysApply: false
+---
+
+# realtrust frontend — UI, Pages, and Navigation
+
+- **MUST** align routes and pages with the transaction journey and backend capabilities. See `references/21-ui-journey-and-pages.md` for route map and role-based nav.
+- **MUST** filter transaction list by role for UX where backend hides data (e.g. BUYER/BUYER_AGENT must not see PRE_LISTING); use `filterTransactionsByRole` from hooks. Backend RLS is final—this is display only.
+- **SHOULD** filter sidebar nav by `user.role` when `navItems[].roles` is set (Inspections, Escrow, Title, Recommendations). Hiding nav is UX only; backend enforces access.
+- **MUST** use shared components for loading (`LoadingSpinner`), error (`ErrorMessage` with retry where appropriate), and empty (`EmptyState`). Show API error code/message (e.g. ILLEGAL_TRANSITION, NOT_FOUND) when useful.
+- **MUST** use `TransactionStateBadge` and consistent state order (PRE_LISTING → … → CLOSED/CANCELLED) across dashboard and transaction views. CLOSED means deed recorded and ownership transfer confirmed (journey-aligned).
+- **SHOULD** wait for `isHydrated` before rendering auth-dependent UI so localStorage seed user is applied before first API call.
+- **Upload UX:** Use a visible "Choose file" button that programmatically triggers the file input so the system file picker opens (transaction Documents tab and Documents page). Display images/documents via API `view_url` when present; show "Upload pending" when not. Surface upload failures with a simple inline message (e.g. "Upload failed. Please try again.").
+
+Consider loading `.cursor/skills/realtrust-frontend/references/21-ui-journey-and-pages.md` and `17-journey-mapping-and-milestones.md` when adding or changing pages or nav.
+
+**User flow completion:** Offers (`/offers`), Escrow (`/escrow`), Title (`/title`), Inspections (`/inspections`) pages and transaction detail tabs (Offers, Escrow, Title, Inspections) use hooks from `use-offers.ts`, `use-escrow.ts`, `use-title.ts`, and `useTransactionInspections`; gate actions with `canMakeOffer`, `canSubmitOffer`, `canCounterOrWithdrawOffer`, `canRejectOrAcceptOffer` and related permissions. See `.cursor/skills/realtrust-frontend/SKILL.md` § New features (user flow completion).

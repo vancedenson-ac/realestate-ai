@@ -1,0 +1,27 @@
+---
+description: realtrust frontend — where things live (implementation map)
+globs: "frontend/**/*.tsx,frontend/**/*.ts,frontend/**/*.css"
+alwaysApply: false
+---
+
+# realtrust frontend — Implementation Map
+
+Use this when editing or adding code under `frontend/`.
+
+| What | Where |
+|------|--------|
+| Config / env | `NEXT_PUBLIC_API_BASE` in `.env.local`; `buildApiUrl` in `src/lib/api.ts` uses it + `/realtrust-ai/v1` |
+| API client | `src/lib/api.ts` — `buildApiUrl`, `getRlsHeaders(user)`, `apiFetch`, `ApiException`; domain `*Api` objects |
+| API types | `src/types/api.ts` — aligned with backend Pydantic (SeedUser, TransactionState, Overview/Create types, ApiError) |
+| Auth (dev) | `src/context/auth-context.tsx` — `AuthProvider`, `useAuth()` → `{ user, setUser, isHydrated }` |
+| Seed users | `src/lib/seed-users.ts` — `SEED_USERS`, `getDefaultSeedUser`, `getSeedUserByIdAndOrg`, `getUniqueUsers`, `displayName` |
+| Data layer | `src/context/query-provider.tsx` — React Query provider; `src/hooks/` — use-transactions, use-listings, use-properties, use-recommendations, use-chat |
+| Layout | `src/app/layout.tsx` — root; `src/components/layout/main-layout.tsx`, `header.tsx`, `sidebar.tsx` |
+| Sidebar nav | `src/components/layout/sidebar.tsx` — `navItems` with optional `roles`; filter by `user.role` |
+| Pages | `src/app/page.tsx` (dashboard), `src/app/transactions/`, `src/app/transactions/[id]/` (Documents tab: Choose file + Upload; list View/Download or Upload pending), `src/app/properties/`, `src/app/properties/[id]/` (images via view_url; Upload pending; upload), `src/app/listings/`, `src/app/offers/`, `src/app/showings/`, `src/app/documents/` (upload card: transaction selector, type, Choose file, Upload), `src/app/inspections/`, `src/app/escrow/`, `src/app/title/`, `src/app/chat/`, `src/app/recommendations/` |
+| Upload / display | API list responses: `PropertyImageOverview.view_url`, `DocumentOverview.view_url` (presigned GET). Use "Choose file" button to open picker; show View/Download when view_url present, "Upload pending" otherwise; simple upload failure message |
+| UI components | `src/components/ui/` — Radix-based (button, card, input, select, dialog, tabs, etc.); `src/components/` — transaction-state-badge, loading-spinner, error-message, empty-state |
+| Utils | `src/lib/utils.ts` — cn, formatCurrency, formatDate, getRoleDisplayName |
+| Tests | `src/__tests__/` — api.test.ts, utils.test.ts, seed-users.test.ts, component tests |
+
+API paths must match backend router: see `.cursor/skills/realtrust-backend/SKILL.md` (API surface) and `.cursor/skills/realtrust-frontend/references/20-api-contract-frontend.md`.

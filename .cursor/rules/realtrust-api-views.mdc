@@ -1,0 +1,18 @@
+---
+description: realtrust ai — API and view contract rules
+globs: "backend/**/api/**/*.py,backend/**/v1/**/*.py,backend/**/*views*,backend/**/domain/**/schemas.py"
+alwaysApply: false
+---
+
+# realtrust ai — API and View Contract
+
+- **MUST** version APIs (e.g. `/v1`). In this repo: base path `/realtrust-ai/v1` (config.API_V1_PREFIX).
+- **MUST** separate commands (writes) from queries (reads).
+- **MUST** ensure all reads are RLS-constrained and classification-aware.
+- **MUST NOT** expose raw event payloads if that would leak restricted information.
+- **SHOULD** support idempotency keys for retriable commands; persist idempotency dedupe in PostgreSQL (authoritative).
+- **MUST** use OpenTelemetry; propagate W3C Trace Context and `X-Correlation-Id` into logs/audit/events.
+
+Map DB exceptions to stable API error codes (ILLEGAL_TRANSITION, PRECONDITION_FAILED, NOT_FOUND, etc.). See `realtrust_api/core/exceptions.py`.
+
+**List endpoints (user flow completion):** GET list for escrow (assignments, earnest-money, funding, disbursements), title (orders, commitments, deed-recorded, ownership-transfer), and inspections by transaction MUST use `get_db_with_rls`. **Transaction create:** BUYER/BUYER_AGENT may only create with `initial_state=LISTED` and must supply `listing_id`; validate in endpoint before DB insert. See `.cursor/skills/realtrust-backend/SKILL.md` § New features.

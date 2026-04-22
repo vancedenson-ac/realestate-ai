@@ -1,0 +1,15 @@
+---
+description: realtrust ai — authority hierarchy (truth, evidence, advice)
+globs: "**/*.py,**/*.sql,**/real-trust-spec/**/*.md,**/.cursor/skills/realtrust-backend/**/*.md"
+alwaysApply: false
+---
+
+# realtrust ai — Authority Hierarchy
+
+- **MUST** treat PostgreSQL authoritative tables as the system of record for binding facts.
+- **MUST** treat the transaction state machine as the source of truth for legality.
+- **MUST** treat domain events as immutable evidence of committed facts.
+- **MUST** treat AI outputs as advisory and non-authoritative.
+- **MUST NOT** store AI outputs as authoritative facts.
+
+When adding or changing persistence: keep authoritative vs derived separation; do not let AI or event consumers write to core transaction/party/document tables.

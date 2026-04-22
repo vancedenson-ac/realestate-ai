@@ -1,0 +1,17 @@
+---
+description: realtrust frontend — transaction states, journey milestones, CLOSED meaning in UI
+globs: "frontend/src/**/*"
+alwaysApply: false
+---
+
+# realtrust frontend — Journey and States in UI
+
+Reference: `.cursor/skills/realtrust-frontend/references/17-journey-mapping-and-milestones.md` and `05-transaction-state-machine-spec.md`.
+
+- **MUST** treat the transaction macro-state machine as the only legality (“law”). The UI displays state and allows the user to request transitions; the backend enforces legality and preconditions.
+- **MUST** implement CLOSED in UI copy and tooltips as: **deed recorded** and **ownership transfer confirmed** (and disbursement recorded where applicable). “Closing day signed” is a milestone inside CLEAR_TO_CLOSE, not sufficient for CLOSED.
+- **MUST NOT** infer legal transitions in the client. Send transition requests to the backend; handle ILLEGAL_TRANSITION and PRECONDITION_FAILED and surface them to the user.
+- **SHOULD** show document checklist and milestone status (e.g. title cleared, funding confirmed) when the backend exposes them, so the user understands why a transition might be blocked.
+- **SHOULD** align dashboard pipeline view and transaction detail with journey phases: PRE_LISTING → LISTED → OFFER_MADE → UNDER_CONTRACT → DUE_DILIGENCE → FINANCING → CLEAR_TO_CLOSE → CLOSED (and CANCELLED).
+
+Consider loading `.cursor/skills/realtrust-frontend/references/05-transaction-state-machine-spec.md` and `17-journey-mapping-and-milestones.md` when changing state display or transition flows.

@@ -1,0 +1,16 @@
+---
+description: realtrust frontend — auth context, RLS headers, seed users
+globs: "frontend/src/context/**/*,frontend/src/lib/seed-users.ts,frontend/src/lib/api.ts"
+alwaysApply: false
+---
+
+# realtrust frontend — Auth and RLS Context
+
+- **MUST** use `useAuth()` to obtain the current `user` (SeedUser) for all API calls. Do not call API without passing this user (so RLS headers are sent).
+- **MUST** send RLS headers on every request: `X-User-Id`, `X-Organization-Id`, `X-Role` via `getRlsHeaders(user)` in `src/lib/api.ts`. Optional: `X-License-State`, `X-Risk-Clearance` if backend supports.
+- **MUST** persist dev user selection in localStorage (key `realtrust_dev_user`) so refresh keeps identity; resolve full SeedUser from `seed-users.ts` by user_id + organization_id.
+- **MUST NOT** allow client-supplied role or user_id to override security in production; in dev, seed-user switcher is for UX only—backend still enforces RLS.
+- **SHOULD** keep `SEED_USERS` in `src/lib/seed-users.ts` in sync with backend `backend/scripts/03-seed.sql` (user_ids, orgs, roles). Use `getUniqueUsers()` for switcher options (unique by user_id + organization_id).
+- **Production (target)**: Identity MUST come from verified OIDC/OAuth2 token; frontend sends `Authorization: Bearer <token>`; backend derives user/org/role from token and MUST NOT trust header overrides for security.
+
+Consider loading `.cursor/skills/realtrust-frontend/references/19-architecture-frontend.md` and `20-api-contract-frontend.md` when changing auth or API client.

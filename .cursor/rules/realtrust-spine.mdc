@@ -1,0 +1,15 @@
+---
+description: realtrust ai — non-negotiables (always apply)
+alwaysApply: true
+---
+
+# realtrust ai — Non-Negotiables
+
+1. **PostgreSQL is the system of record** for authoritative facts.
+2. **Transaction state machine defines legality**; one legal mutation path per domain; DB is final authority.
+3. **Events are evidence of committed facts**; no event without commit; outbox for publishing.
+4. **AI is advisory only**; no AI writes to authoritative state or bypass of access control.
+5. **Authorization is DB-enforced (RLS)**; explicit denies win (e.g. lender cannot see inspection reports).
+6. **Illegal end states are unrepresentable**; invariants in DB; verified by negative tests.
+
+When in doubt, load the realtrust-backend skill: `.cursor/skills/realtrust-backend/SKILL.md` and references in `.cursor/skills/realtrust-backend/references/`.

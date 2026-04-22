@@ -1,0 +1,16 @@
+---
+description: realtrust frontend — non-negotiables (always apply when working on frontend)
+globs: "frontend/**/*"
+alwaysApply: false
+---
+
+# realtrust frontend — Non-Negotiables
+
+1. **Backend is the authority** for legality, state transitions, and visibility (PostgreSQL RLS). The frontend MUST NOT enforce authorization; it only passes identity and reflects what the API returns.
+2. **RLS headers on every request**: All API calls MUST send `X-User-Id`, `X-Organization-Id`, `X-Role` (and optional headers) from the current auth context. Use `getRlsHeaders(user)` and pass `user` from `useAuth()`.
+3. **One identity per request**: The current user (and org/role) is set in AuthContext. No client-supplied role in mutation bodies (e.g. transition role comes from backend session).
+4. **Types match API**: Frontend types in `src/types/api.ts` MUST stay in sync with backend Pydantic schemas. API path strings MUST match backend router paths (see realtrust-ai skill API surface).
+5. **No security in UI**: Hiding a button or nav item is UX only. The backend MUST reject unauthorized actions; the frontend MUST handle 403/404 and error codes (e.g. ILLEGAL_TRANSITION, PRECONDITION_FAILED) and surface them to the user.
+6. **Journey-aligned UI**: Screens and navigation MUST align with transaction macro-states and milestone facts. CLOSED means deed recorded and ownership transfer confirmed.
+
+When in doubt, load the realtrust-frontend skill: `.cursor/skills/realtrust-frontend/SKILL.md` and references in `.cursor/skills/realtrust-frontend/references/`. For backend API paths, load `.cursor/skills/realtrust-backend/SKILL.md`.

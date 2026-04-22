@@ -1,0 +1,32 @@
+---
+description: realtrust ai — journey milestones (image → facts → invariants)
+globs: "backend/**/domain/**/*.py,backend/**/api/**/*.py,backend/scripts/**/*.sql,**/migrations/**/*.py"
+alwaysApply: false
+---
+
+# realtrust ai — Journey Milestones (Image → Facts → Invariants)
+
+Reference: `references/17-journey-mapping-and-milestones.md`.
+
+- **MUST** treat the macro-state machine as the only legality (“law”).
+- **MUST** treat journey steps that are not macro-states as **authoritative milestone facts** (PostgreSQL tables/rows), not UI-only flags.
+- **MUST** gate macro transitions using DB-enforced preconditions/invariants that reference those milestone facts (pure predicates; no external calls inside the commit).
+
+## Binding CLOSED meaning
+
+- **MUST** implement `CLOSED` as: **deed recorded** and **ownership transfer confirmed** (and disbursement recorded where applicable).
+- **MUST** reject `CLEAR_TO_CLOSE → CLOSED` if deed recording / ownership transfer evidence is missing.
+
+## Non-exhaustive milestone families that MUST exist as facts
+
+- **Offers & negotiation**: offers/counteroffers/accept/reject/withdraw with actor + timestamp + required reasons.
+- **Showings/viewings**: schedule/complete/cancel, policy-filtered to avoid identity side-channels.
+- **Title & recording**: title order/commitment/clearance; deed recording confirmation.
+- **Escrow & funding**: earnest money, funding confirmation, disbursements (REGULATED).
+
+## Evidence and provability (SOC 2 / FINRA)
+
+- **MUST** write append-only audit evidence for regulated milestones (funds, disbursement, recording, policy changes).
+- **MUST** emit reference-first domain events + outbox rows only after committed facts.
+- **SHOULD** log access decisions for sensitive reads/writes to prove “could not access.”
+

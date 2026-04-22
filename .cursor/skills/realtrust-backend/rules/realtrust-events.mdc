@@ -1,0 +1,16 @@
+---
+description: realtrust ai — events and outbox (evidence architecture)
+globs: "**/events/**/*.py,**/workers/outbox*.py,**/db/**/*.py,**/*outbox*.*,**/*event*.*"
+alwaysApply: false
+---
+
+# realtrust ai — Events and Outbox
+
+- **MUST**: if a transition/fact does not commit, no event may exist.
+- **MUST** emit domain events inside the same DB transaction as the authoritative commit.
+- **MUST NOT** perform external network calls inside the authoritative commit transaction.
+- **MUST** use an outbox (or equivalent) to publish committed events to Kafka reliably.
+- **MUST** ensure event delivery is idempotent (dedupe on `event_id`).
+- **MUST** ensure event payloads do not leak restricted facts (no authorization side channel).
+
+Kafka is event transport for derived behavior; PostgreSQL remains the system of record.

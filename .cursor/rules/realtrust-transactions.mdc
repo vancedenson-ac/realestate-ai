@@ -1,0 +1,17 @@
+---
+description: realtrust ai — transaction state machine (legality)
+globs: "backend/**/domain/**/transactions/**/*.py,backend/**/db/**/*.py,backend/**/*transaction*.py,backend/scripts/**/*.sql,**/migrations/**/*.py"
+alwaysApply: false
+---
+
+# realtrust ai — Transaction Legality
+
+- **MUST** implement exactly one authoritative state machine; derive DB seeds/guards/tests from `05-transaction-state-machine-spec.md` (skill references).
+- **MUST NOT** allow state skipping or outgoing transitions from terminal states (CLOSED, CANCELLED).
+- **MUST** enforce transitions as commands (call DB transition function), not generic updates to `current_state`.
+- **MUST** lock the transaction row during transition (`SELECT ... FOR UPDATE`) or equivalent.
+- **MUST** enforce transition preconditions in DB (pure predicates over authoritative facts), including journey milestones where required by spec.
+- **MUST** enforce close prerequisites in DB: required documents present and signed; no unresolved critical inspection findings; and journey-aligned close gating facts (funds confirmed, disbursement recorded, deed recorded, ownership transfer confirmed).
+- **MUST** derive the actor role from the DB session (`SET LOCAL app.role`) during transitions; clients MUST NOT supply roles in the transition body.
+
+Do not add new transitions or states without updating the canonical spec and regenerating seeds (03-seed.sql) and transition logic (02-schema.sql) and negative tests.

@@ -1,0 +1,16 @@
+---
+description: realtrust ai — authorization and RLS (who can see/do what)
+globs: "backend/**/api/**/*.py,backend/**/db/**/*.py,backend/**/core/**/*.py,**/*rls*.*,backend/scripts/**/*.sql"
+alwaysApply: false
+---
+
+# realtrust ai — Authorization and Data Access
+
+- **MUST** use the permission equation: Organization ∩ Role ∩ Relationship ∩ TransactionState ∩ DataClassification ∩ Jurisdiction.
+- **MUST** enforce final visibility in PostgreSQL via RLS for transaction-scoped/confidential/regulated tables.
+- **MUST** set DB session context per request (`SET LOCAL app.user_id`, `app.organization_id`, `app.role`, jurisdiction). In this repo: `realtrust_api/api/deps.py` → `get_db_with_rls`.
+- **MUST** ensure RLS policies fail closed when required session settings are missing.
+- **MUST NOT** rely on frontend/client-side gating for security.
+- **MUST** implement explicit denies; e.g. inspection report visible to lender is structurally impossible (explicit deny wins).
+
+Never filter "in app" to emulate authorization; RLS is final authority.

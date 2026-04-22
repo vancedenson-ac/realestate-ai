@@ -1,0 +1,29 @@
+---
+description: realtrust ai — where things live (implementation map)
+globs: "backend/**/*.py,backend/scripts/**/*.sql,backend/tests/**/*.py"
+alwaysApply: false
+---
+
+# realtrust ai — Implementation Map
+
+Use this when editing or adding code under `backend/`.
+
+| What | Where |
+|------|--------|
+| Config, API base | `src/realtrust_api/config.py` (API_V1_PREFIX = `/realtrust-ai/v1`) |
+| Auth + RLS context | `src/realtrust_api/api/deps.py` — `get_db_with_rls` sets `app.user_id`, `app.organization_id`, `app.role`, `app.license_state`, and optionally `app.risk_clearance` (SET LOCAL). Dev: headers; prod/strict: `REALTRUST_AUTH_STRICT=1` disables header fallback. |
+| Exceptions | `src/realtrust_api/core/exceptions.py` (illegal_transition_exception, not_found_exception, etc.) |
+| Audit evidence writer | `src/realtrust_api/core/audit.py` — append-only `audit_events` evidence for regulated milestones |
+| State machine (DB) | `scripts/02-schema.sql`: `transaction_states`, `transaction_state_transitions`, `transition_transaction_state()`, `assert_transaction_invariants()` |
+| Seeds (states/transitions) | `scripts/03-seed.sql` — must stay in sync with `05-transaction-state-machine-spec.md` |
+| Domain models/schemas | `src/realtrust_api/domain/{transactions,documents,events,inspections,matching,properties,messaging,offers,showings,escrow,title}/` — `models.py`, `schemas.py` |
+| V1 router + endpoints | `src/realtrust_api/api/v1/router.py`; endpoints in `api/v1/endpoints/*.py` |
+| Transition command | `api/v1/endpoints/transactions.py` — POST `.../transitions` calls DB `transition_transaction_state(transaction_id, to_state)`; role comes from `SET LOCAL app.role` (dev: `X-Role` header) |
+| Transaction create (buyer make-offer) | `api/v1/endpoints/transactions.py` — BUYER/BUYER_AGENT may only create with `initial_state=LISTED` and must supply `listing_id`; `initial_party_role` must be BUYER or BUYER_AGENT |
+| Escrow / Title / Inspections list | `api/v1/endpoints/escrow.py` (GET assignments, earnest-money, funding, disbursements), `title.py` (GET orders, commitments, deed-recorded, ownership-transfer), `inspections.py` (GET by transaction); all use `get_db_with_rls` |
+| Storage (MinIO/S3) | `src/realtrust_api/core/storage.py` — `get_presigned_put_url` (MinIO SDK), `get_presigned_get_url`, `ensure_bucket_exists`; config `S3_PUBLIC_ENDPOINT_URL` for browser presigned URLs. Property images list and documents list/get include `view_url` when upload/version exists |
+| Tests | `tests/conftest.py` (schema+seed, client, api_base, `client_as_bob`, `client_as_alice`, `client_as_eve`); `tests/test_*.py` — add negative tests for illegal transitions, wrong role, RLS denial, and milestone gating (title/appraisal/funding/recording/transfer) |
+| Health | `main.py` — GET `/health` (no API prefix); returns `{"status": "ok"}` |
+| Scripts | `scripts/01-roles.sql`, `scripts/init-extensions.sql` (uuid-ossp, pgcrypto, vector, postgis), `scripts/02-schema.sql`, `scripts/03-seed.sql`. Apply in that order for fresh DB; conftest or `seed.bat` run schema+seed before tests. |
+
+Changing state machine: update spec → `03-seed.sql` + `02-schema.sql` (if transition table changes) + add/update negative tests in `tests/test_transactions.py`.

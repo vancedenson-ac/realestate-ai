@@ -1,0 +1,18 @@
+---
+description: realtrust frontend — API client, paths, types, error handling
+globs: "frontend/src/lib/api.ts,frontend/src/types/api.ts,frontend/src/hooks/**/*"
+alwaysApply: false
+---
+
+# realtrust frontend — API Client and Types
+
+- **MUST** use `apiFetch<T>(path, { user, method?, body?, params? })` for all backend calls; never bypass RLS headers (always pass `user` from `useAuth()`).
+- **MUST** keep API path strings aligned with backend router. Backend mounts routers with specific prefixes; path must not duplicate segment (e.g. list offers: `transactions/${transactionId}/offers`, not `offers/transactions/${transactionId}/offers`). See `.cursor/skills/realtrust-backend/SKILL.md` (API surface) and `references/20-api-contract-frontend.md`.
+- **MUST** keep `src/types/api.ts` in sync with backend Pydantic response/request schemas. When backend adds or changes a field or endpoint, update types and `*Api` methods.
+- **MUST** handle errors via `ApiException` (status, code, details). Map backend error codes (ILLEGAL_TRANSITION, PRECONDITION_FAILED, NOT_FOUND, etc.) to user-facing messages in UI.
+- **SHOULD** include user identity in React Query keys (e.g. `["transactions", user.user_id, user.organization_id, params]`) so cache is per-identity and mutations invalidate correct queries.
+- **MUST NOT** send role or user_id in request body for commands that are role-scoped (e.g. state transition); backend derives role from session (RLS headers in dev).
+
+Consider loading `.cursor/skills/realtrust-frontend/references/20-api-contract-frontend.md` when adding or changing endpoints.
+
+**User flow completion:** Offers, escrow, title, inspections use `offersApi`, `escrowApi`, `titleApi`, `inspectionsApi` and paths `transactions/${id}/offers`, `transactions/${id}/escrow/assignments`, etc. (no domain prefix). Hooks: `use-offers.ts`, `use-escrow.ts`, `use-title.ts`, and `useTransactionInspections` in `use-transactions.ts`. See `.cursor/skills/realtrust-frontend/SKILL.md` § New features (user flow completion).

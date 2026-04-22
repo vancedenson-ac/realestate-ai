@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    /* Transaction state colors */
+    --state-pre-listing: 210 40% 60%;
+    --state-listed: 142 71% 45%;
+    --state-offer-made: 38 92% 50%;
+    --state-under-contract: 262 83% 58%;
+    --state-due-diligence: 199 89% 48%;
+    --state-financing: 280 68% 60%;
+    --state-clear-to-close: 158 64% 52%;
+    --state-closed: 142 76% 36%;
+    --state-cancelled: 0 84% 60%;
+  }
+
+  /* Dark theme: OLED-friendly true black background; elevated surfaces use dark gray */
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 14%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 224.3 76.3% 48%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+
+    /* Transaction state colors - dark mode */
+    --state-pre-listing: 210 40% 50%;
+    --state-listed: 142 71% 40%;
+    --state-offer-made: 38 92% 45%;
+    --state-under-contract: 262 83% 50%;
+    --state-due-diligence: 199 89% 42%;
+    --state-financing: 280 68% 52%;
+    --state-clear-to-close: 158 64% 45%;
+    --state-closed: 142 76% 32%;
+    --state-cancelled: 0 84% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply overflow-x-hidden;
+  }
+  body {
+    @apply bg-background text-foreground min-h-screen;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/* Transaction state badges */
+.state-badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.state-badge-pre-listing {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400;
+}
+
+.state-badge-listed {
+  @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
+}
+
+.state-badge-offer-made {
+  @apply bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400;
+}
+
+.state-badge-under-contract {
+  @apply bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400;
+}
+
+.state-badge-due-diligence {
+  @apply bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400;
+}
+
+.state-badge-financing {
+  @apply bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400;
+}
+
+.state-badge-clear-to-close {
+  @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400;
+}
+
+.state-badge-closed {
+  @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
+}
+
+.state-badge-cancelled {
+  @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
+}
+
+/* ============================================================================
+   Mapbox GL popup overrides — match app theme (light/dark)
+   ============================================================================ */
+.listing-map-popup .mapboxgl-popup-content {
+  @apply rounded-lg border bg-card p-3 shadow-lg;
+  max-width: 320px;
+}
+
+.listing-map-popup .mapboxgl-popup-close-button {
+  @apply text-muted-foreground hover:text-foreground text-lg;
+  right: 6px;
+  top: 4px;
+}
+
+.listing-map-popup .mapboxgl-popup-tip {
+  border-top-color: hsl(var(--card));
+}
+
+.dark .listing-map-popup .mapboxgl-popup-tip {
+  border-top-color: hsl(var(--card));
+}

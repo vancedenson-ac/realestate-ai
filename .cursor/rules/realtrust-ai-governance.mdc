@@ -1,0 +1,15 @@
+---
+description: realtrust ai — AI governance (advisory-only)
+globs: "backend/**/ai/**/*.py,backend/**/workers/*ai*.py,backend/**/domain/**/matching/**/*.py,backend/**/*rag*,backend/**/*embedding*"
+alwaysApply: false
+---
+
+# realtrust ai — AI Governance
+
+- **MUST** treat AI as a bounded subsystem that reacts to events.
+- **MUST** restrict AI reads to RLS-filtered views/resources.
+- **MUST** restrict AI writes to advisory artifacts (AI tasks/insights), not authoritative tables.
+- **MUST NOT** allow AI to: change transaction state, sign/lock documents, disburse/approve funds, bypass access control.
+- **MUST** store AI provenance (model id/version, prompt template/version, prompt hash, input references).
+
+AI identity MUST be least-privileged and RLS-constrained.

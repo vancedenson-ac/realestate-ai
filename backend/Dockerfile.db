@@ -1,0 +1,31 @@
+# realtrust ai — PostgreSQL 16 + PostGIS + pgvector for local dev
+# Use official postgres image (has pgdg repo); add PostGIS and pgvector.
+# syntax=docker/dockerfile:1
+FROM postgres:16-bookworm
+
+# PostGIS from PostgreSQL APT repo (same repo as postgres:16-bookworm)
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+     postgresql-16-postgis-3 \
+  && rm -rf /var/lib/apt/lists/*
+
+# Fetch pgvector source (BuildKit ADD; no git in image)
+ADD https://github.com/pgvector/pgvector.git#v0.7.0 /tmp/pgvector
+
+# Build and install pgvector (postgresql-server-dev-16 is in pgdg repo)
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+     build-essential \
+     postgresql-server-dev-16 \
+  && cd /tmp/pgvector \
+  && make clean \
+  && make OPTFLAGS="" \
+  && make install \
+  && cd / \
+  && rm -rf /tmp/pgvector \
+  && apt-get purge -y build-essential postgresql-server-dev-16 \
+  && apt-get autoremove -y --purge \
+  && rm -rf /var/lib/apt/lists/*
+
+# Extensions: uuid-ossp, pgcrypto in base; postgis installed above; vector installed above.
+# pg_stat_statements is in postgresql-contrib (optional for dev).
